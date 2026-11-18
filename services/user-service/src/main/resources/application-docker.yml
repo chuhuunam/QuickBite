@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/user_db
+    username: quickbite
+    password: quickbite123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  h2:
+    console:
+      enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    com.quickbite: INFO
+    org.springframework.security: WARN

@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+.claude
+
+# Build
+target/
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Docs
+docs/
+*.md
+!README.md
+
+# Tests
+**/src/test/
+
+# Todo
+.todo/

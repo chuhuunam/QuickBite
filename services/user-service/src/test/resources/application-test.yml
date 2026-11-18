@@ -20,6 +20,10 @@ security:
     max-failed-attempts: 5
     lockout-duration-minutes: 15
 
+eureka:
+  client:
+    enabled: false
+
 logging:
   level:
     root: WARN

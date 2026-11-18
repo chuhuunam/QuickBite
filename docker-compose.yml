@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # ==================== Infrastructure ====================
+  postgres:
+    image: postgres:16-alpine
+    container_name: quickbite-postgres
+    environment:
+      POSTGRES_USER: quickbite
+      POSTGRES_PASSWORD: quickbite123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quickbite"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quickbite-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: quickbite-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - quickbite-network
+
+  # ==================== Discovery Server ====================
+  discovery-server:
+    build:
+      context: ./infrastructure/discovery-server
+      dockerfile: Dockerfile
+    container_name: quickbite-discovery
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - quickbite-network
+
+  # ==================== Business Services ====================
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: quickbite-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=quickbite
+      - SPRING_DATASOURCE_PASSWORD=quickbite123
+      - EUREKA_URI=http://discovery-server:8761/eureka
+      - JWT_SECRET=your-super-secret-jwt-key-must-be-at-least-256-bits-long
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - quickbite-network
+
+networks:
+  quickbite-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
