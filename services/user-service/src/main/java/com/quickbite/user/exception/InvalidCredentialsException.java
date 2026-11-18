@@ -1,0 +1,8 @@
+package com.quickbite.user.exception;
+
+public class InvalidCredentialsException extends RuntimeException {
+
+    public InvalidCredentialsException() {
+        super("Email hoặc mật khẩu không đúng");
+    }
+}
