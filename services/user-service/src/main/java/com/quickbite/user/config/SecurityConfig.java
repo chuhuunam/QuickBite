@@ -26,11 +26,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()
-                )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // For H2 console
+                );
 
         return http.build();
     }

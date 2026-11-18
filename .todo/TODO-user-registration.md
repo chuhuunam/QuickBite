@@ -7,19 +7,23 @@
 - **Started:** 2026-11-18
 
 ## Phase Progress
-- [ ] Phase 1: Phân tích ⬅️ ĐANG LÀM
-- [ ] Phase 2: Thiết kế
-- [ ] Phase 3: Coding
-- [ ] Phase 4: Review
+- [x] Phase 1: Phân tích ✅
+- [x] Phase 2: Thiết kế ✅
+- [x] Phase 3: Coding ✅
+- [ ] Phase 4: Review ⬅️ ĐANG LÀM
 - [ ] Phase 5: Test
 - [ ] Phase 6: Merge
 
 ## Scope
-_(Chờ confirm từ Phase 1)_
+- **Services:** user-service, common
+- **Files:** 23 files created
+- **API:** POST /api/auth/register
 
 ## Design
-_(Chờ từ Phase 2)_
+- User entity với JPA
+- BCrypt password encoding
+- JWT tokens (access + refresh)
+- Validation + Error handling
 
-## Notes
-- Task đầu tiên của project
-- Cần setup user-service trước
+## Commits
+- `47f6610` feat(user-service): implement user registration endpoint

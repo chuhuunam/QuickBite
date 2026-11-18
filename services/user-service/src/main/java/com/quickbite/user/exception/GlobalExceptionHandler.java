@@ -2,6 +2,7 @@ package com.quickbite.user.exception;
 
 import com.quickbite.common.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +20,17 @@ public class GlobalExceptionHandler {
         log.warn("Email already exists: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.of("EMAIL_EXISTS", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
+        if (ex.getMessage() != null && ex.getMessage().contains("email")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ErrorResponse.of("EMAIL_EXISTS", "Email already exists"));
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.of("DUPLICATE_ENTRY", "Resource already exists"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
