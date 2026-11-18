@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quickbite.user.dto.AuthResponse;
 import com.quickbite.user.dto.LoginRequest;
 import com.quickbite.user.dto.LogoutRequest;
+import com.quickbite.user.dto.RefreshTokenRequest;
 import com.quickbite.user.dto.RegisterRequest;
 import com.quickbite.user.dto.UserResponse;
 import com.quickbite.user.enums.UserRole;
 import com.quickbite.user.exception.AccountLockedException;
 import com.quickbite.user.exception.EmailAlreadyExistsException;
 import com.quickbite.user.exception.InvalidCredentialsException;
+import com.quickbite.user.exception.InvalidTokenException;
 import com.quickbite.user.service.AuthService;
 
 import java.time.LocalDateTime;
@@ -212,5 +214,54 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Đăng xuất thành công"));
+    }
+
+    @Test
+    @DisplayName("POST /api/auth/refresh - success returns 200")
+    void refreshToken_Success() throws Exception {
+        // Given
+        RefreshTokenRequest request = RefreshTokenRequest.builder()
+                .refreshToken("valid_refresh_token")
+                .build();
+
+        AuthResponse response = AuthResponse.builder()
+                .accessToken("new_access_token")
+                .refreshToken("new_refresh_token")
+                .user(UserResponse.builder()
+                        .id(1L)
+                        .email("test@example.com")
+                        .fullName("Test User")
+                        .role(UserRole.CUSTOMER)
+                        .build())
+                .build();
+
+        when(authService.refreshToken("valid_refresh_token")).thenReturn(response);
+
+        // When/Then
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("new_access_token"))
+                .andExpect(jsonPath("$.refreshToken").value("new_refresh_token"));
+    }
+
+    @Test
+    @DisplayName("POST /api/auth/refresh - invalid token returns 401")
+    void refreshToken_InvalidToken_Returns401() throws Exception {
+        // Given
+        RefreshTokenRequest request = RefreshTokenRequest.builder()
+                .refreshToken("invalid_token")
+                .build();
+
+        when(authService.refreshToken("invalid_token"))
+                .thenThrow(new InvalidTokenException());
+
+        // When/Then
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_TOKEN"));
     }
 }

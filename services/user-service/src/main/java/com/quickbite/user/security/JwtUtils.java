@@ -1,6 +1,9 @@
 package com.quickbite.user.security;
 
 import com.quickbite.user.entity.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,9 +43,31 @@ public class JwtUtils {
     public String generateRefreshToken(User user) {
         return Jwts.builder()
                 .subject(user.getId().toString())
+                .claim("type", "refresh")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public Long validateRefreshTokenAndGetUserId(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String type = claims.get("type", String.class);
+            if (!"refresh".equals(type)) {
+                return null;
+            }
+
+            return Long.parseLong(claims.getSubject());
+        } catch (ExpiredJwtException e) {
+            return null;
+        } catch (JwtException | NumberFormatException e) {
+            return null;
+        }
     }
 }

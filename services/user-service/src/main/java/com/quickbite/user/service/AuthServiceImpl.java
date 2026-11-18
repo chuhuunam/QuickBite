@@ -10,6 +10,7 @@ import com.quickbite.user.enums.UserStatus;
 import com.quickbite.user.exception.AccountLockedException;
 import com.quickbite.user.exception.EmailAlreadyExistsException;
 import com.quickbite.user.exception.InvalidCredentialsException;
+import com.quickbite.user.exception.InvalidTokenException;
 import com.quickbite.user.repository.UserRepository;
 import com.quickbite.user.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,35 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .user(toUserResponse(user))
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AuthResponse refreshToken(String refreshToken) {
+        log.info("Refresh token request");
+
+        Long userId = jwtUtils.validateRefreshTokenAndGetUserId(refreshToken);
+        if (userId == null) {
+            throw new InvalidTokenException();
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(InvalidTokenException::new);
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new InvalidTokenException();
+        }
+
+        String newAccessToken = jwtUtils.generateAccessToken(user);
+        String newRefreshToken = jwtUtils.generateRefreshToken(user);
+
+        log.info("Token refreshed for user id: {}", user.getId());
+
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .user(toUserResponse(user))
                 .build();
     }

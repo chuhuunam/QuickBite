@@ -3,6 +3,7 @@ package com.quickbite.user.controller;
 import com.quickbite.user.dto.AuthResponse;
 import com.quickbite.user.dto.LoginRequest;
 import com.quickbite.user.dto.LogoutRequest;
+import com.quickbite.user.dto.RefreshTokenRequest;
 import com.quickbite.user.dto.RegisterRequest;
 import com.quickbite.user.service.AuthService;
 import jakarta.validation.Valid;
@@ -36,6 +37,13 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Login request received");
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        log.info("Refresh token request received");
+        AuthResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 

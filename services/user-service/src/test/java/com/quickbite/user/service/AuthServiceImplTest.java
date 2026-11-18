@@ -9,6 +9,7 @@ import com.quickbite.user.enums.UserStatus;
 import com.quickbite.user.exception.AccountLockedException;
 import com.quickbite.user.exception.EmailAlreadyExistsException;
 import com.quickbite.user.exception.InvalidCredentialsException;
+import com.quickbite.user.exception.InvalidTokenException;
 import com.quickbite.user.repository.UserRepository;
 import com.quickbite.user.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -309,5 +310,60 @@ class AuthServiceImplTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         assertThat(userCaptor.getValue().getFailedLoginAttempts()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("refreshToken - should return new tokens on valid refresh token")
+    void refreshToken_Success() {
+        // Given
+        when(jwtUtils.validateRefreshTokenAndGetUserId("valid_refresh_token")).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(jwtUtils.generateAccessToken(existingUser)).thenReturn("new_access_token");
+        when(jwtUtils.generateRefreshToken(existingUser)).thenReturn("new_refresh_token");
+
+        // When
+        AuthResponse response = authService.refreshToken("valid_refresh_token");
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getAccessToken()).isEqualTo("new_access_token");
+        assertThat(response.getRefreshToken()).isEqualTo("new_refresh_token");
+        assertThat(response.getUser().getId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("refreshToken - should throw when token invalid")
+    void refreshToken_InvalidToken_ThrowsException() {
+        // Given
+        when(jwtUtils.validateRefreshTokenAndGetUserId("invalid_token")).thenReturn(null);
+
+        // When/Then
+        assertThatThrownBy(() -> authService.refreshToken("invalid_token"))
+                .isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    @DisplayName("refreshToken - should throw when user not found")
+    void refreshToken_UserNotFound_ThrowsException() {
+        // Given
+        when(jwtUtils.validateRefreshTokenAndGetUserId("valid_token")).thenReturn(999L);
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When/Then
+        assertThatThrownBy(() -> authService.refreshToken("valid_token"))
+                .isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    @DisplayName("refreshToken - should throw when user inactive")
+    void refreshToken_InactiveUser_ThrowsException() {
+        // Given
+        existingUser.setStatus(UserStatus.INACTIVE);
+        when(jwtUtils.validateRefreshTokenAndGetUserId("valid_token")).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+
+        // When/Then
+        assertThatThrownBy(() -> authService.refreshToken("valid_token"))
+                .isInstanceOf(InvalidTokenException.class);
     }
 }
