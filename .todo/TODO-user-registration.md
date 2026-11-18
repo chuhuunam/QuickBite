@@ -10,9 +10,9 @@
 - [x] Phase 1: Phân tích ✅
 - [x] Phase 2: Thiết kế ✅
 - [x] Phase 3: Coding ✅
-- [ ] Phase 4: Review ⬅️ ĐANG LÀM
-- [ ] Phase 5: Test
-- [ ] Phase 6: Merge
+- [x] Phase 4: Review ✅
+- [x] Phase 5: Test ✅
+- [x] Phase 6: Merge ✅ DONE
 
 ## Scope
 - **Services:** user-service, common
