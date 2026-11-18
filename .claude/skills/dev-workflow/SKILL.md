@@ -47,13 +47,14 @@ Quy trình phát triển chuẩn cho team QuickBite.
 ## TODO.md Template
 
 ```markdown
-# TODO: <Task Name>
+# TODO: <TASK-ID> - <Task Name>
 
 ## Task Info
 - **Source:** docs/ba/<path>
 - **Branch:** feature/<name>
 - **Services:** [user-service, web-app, ...]
 - **Started:** YYYY-MM-DD
+- **Completed:** YYYY-MM-DD
 
 ## Phase Progress
 - [ ] Phase 1: Phân tích
@@ -63,12 +64,62 @@ Quy trình phát triển chuẩn cho team QuickBite.
 - [ ] Phase 5: Test
 - [ ] Phase 6: Merge
 
-## Scope
-<từ Phase 1>
+---
 
-## Design
-<từ Phase 2>
+## Phase 1: Phân tích
+**Scope:** <mô tả ngắn task làm gì>
 
-## Notes
-<ghi chú trong quá trình làm>
+**Files cần tạo/sửa:**
+- file1.java - <lý do>
+- file2.ts - <lý do>
+
+---
+
+## Phase 2: Thiết kế
+**API Contract:**
+- POST /api/xxx → Request/Response
+
+**Data Model:**
+- Entity: fields
+
+**Classes:**
+- Controller → Service → Repository
+
+---
+
+## Phase 3: Coding
+**Commits:**
+- `hash` message
+
+**Files tạo:** X files
+
+---
+
+## Phase 4: Review
+**Issues found:** X
+**Fixed:** Y
+
+**Fixes:**
+1. ✅ Issue → Solution
+
+---
+
+## Phase 5: Test
+**Test files:** X
+**Coverage:** mô tả test cases
+
+---
+
+## Phase 6: Merge
+**Pushed to:** <URL>
+**Final commit:** `hash`
+
+---
+
+## Summary
+| Metric | Value |
+|--------|-------|
+| Files | X |
+| Commits | X |
+| Tests | X |
 ```
