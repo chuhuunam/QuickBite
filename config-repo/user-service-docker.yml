@@ -1,0 +1,36 @@
+# User Service Configuration - Docker Profile
+
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/user_db
+    username: quickbite
+    password: quickbite123
+    driver-class-name: org.postgresql.Driver
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+security:
+  login:
+    max-failed-attempts: 5
+    lockout-duration-minutes: 15
+
+logging:
+  level:
+    com.quickbite: INFO
+    org.springframework.security: WARN

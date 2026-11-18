@@ -1,39 +1,18 @@
-server:
-  port: 8081
-
 spring:
   application:
     name: user-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8888}
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        max-attempts: 5
+        initial-interval: 1000
 
-  datasource:
-    url: jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
-
-jwt:
-  secret: ${JWT_SECRET:change-me-in-production-must-be-at-least-256-bits}
-  expiration: 86400000      # 24 hours
-  refresh-expiration: 604800000  # 7 days
-
-security:
-  login:
-    max-failed-attempts: 5
-    lockout-duration-minutes: 15
+# Fallback config when Config Server is unavailable
+server:
+  port: 8081
 
 eureka:
   client:
@@ -44,17 +23,3 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    com.quickbite: DEBUG
-    org.springframework.security: DEBUG

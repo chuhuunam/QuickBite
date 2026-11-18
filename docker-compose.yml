@@ -45,6 +45,30 @@ services:
     networks:
       - quickbite-network
 
+  # ==================== Config Server ====================
+  config-server:
+    build:
+      context: ./infrastructure/config-server
+      dockerfile: Dockerfile
+    container_name: quickbite-config
+    ports:
+      - "8888:8888"
+    environment:
+      - EUREKA_URI=http://discovery-server:8761/eureka
+      - CONFIG_REPO_PATH=/config-repo
+    volumes:
+      - ./config-repo:/config-repo:ro
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - quickbite-network
+
   # ==================== Business Services ====================
   user-service:
     build:
@@ -55,15 +79,13 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
-      - SPRING_DATASOURCE_USERNAME=quickbite
-      - SPRING_DATASOURCE_PASSWORD=quickbite123
+      - CONFIG_SERVER_URI=http://config-server:8888
       - EUREKA_URI=http://discovery-server:8761/eureka
       - JWT_SECRET=your-super-secret-jwt-key-must-be-at-least-256-bits-long
     depends_on:
       postgres:
         condition: service_healthy
-      discovery-server:
+      config-server:
         condition: service_healthy
     networks:
       - quickbite-network
