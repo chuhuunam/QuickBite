@@ -29,6 +29,12 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
+    @org.springframework.beans.factory.annotation.Value("${security.login.max-failed-attempts:5}")
+    private int maxFailedAttempts;
+
+    @org.springframework.beans.factory.annotation.Value("${security.login.lockout-duration-minutes:15}")
+    private int lockoutDurationMinutes;
+
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -114,8 +120,8 @@ public class AuthServiceImpl implements AuthService {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
 
-        if (attempts >= 5) {
-            user.setLockoutTime(LocalDateTime.now().plusMinutes(15));
+        if (attempts >= maxFailedAttempts) {
+            user.setLockoutTime(LocalDateTime.now().plusMinutes(lockoutDurationMinutes));
             log.warn("Account locked due to {} failed attempts", attempts);
         }
 
